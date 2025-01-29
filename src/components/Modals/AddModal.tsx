@@ -50,6 +50,12 @@ const AddModal = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+
+    // Ensure that priority can only be 'low', 'medium', or 'high'
+    if (name === "priority" && !["low", "medium", "high"].includes(value)) {
+      return; // Ignore invalid value for priority
+    }
+
     setTaskData({ ...taskData, [name]: value });
   };
 
@@ -100,11 +106,11 @@ const AddModal = ({
         className="w-full h-full bg-black opacity-70 absolute left-0 top-0 z-20"
         onClick={closeModal}
       ></div>
-      <div className="md:w-[30vw] w-[90%] bg-white rounded-lg shadow-md z-50 flex flex-col items-center gap-3 px-5 py-6 relative">
+      <div className="md:w-[40vw] w-[90%] bg-white rounded-lg shadow-md z-50 flex flex-col items-center gap-3 px-5 py-6 relative">
         {/* Close Button */}
         <button
           onClick={closeModal}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 focus:outline-none text-2xl"
+          className="absolute top-1 right-1 text-gray-500 hover:text-gray-800 focus:outline-none text-2xl"
         >
           &times;
         </button>
@@ -126,17 +132,23 @@ const AddModal = ({
             placeholder="Description"
             className="w-full h-12 px-3 outline-none rounded-md bg-slate-100 border border-slate-300 text-sm font-medium focus:bg-gray-200 hover:bg-gray-200 transition-all"
           />
+          
+          {/* Priority Label and Select */}
+          <label htmlFor="priority" className="w-full text-sm font-medium text-gray-700">
+            Priority
+          </label>
           <select
+            id="priority"
             name="priority"
             onChange={handleChange}
             value={taskData.priority}
             className="w-full h-12 px-2 outline-none rounded-md bg-slate-100 border border-slate-300 text-sm focus:bg-gray-200 hover:bg-gray-200 transition-all"
           >
-            <option value="">Priority</option>
             <option value="low">Low</option>
             <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
+
           <input
             type="number"
             name="deadline"

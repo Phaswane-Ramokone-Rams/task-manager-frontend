@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { useState } from "react";
 import { Board } from "../../data/board";
@@ -7,16 +6,18 @@ import { onDragEnd } from "../../helpers/onDragEnd";
 import { AddOutline } from "react-ionicons";
 import AddModal from "../../components/Modals/AddModal";
 import Task from "../../components/Task";
+import Navbar from "../../components/Navbar";
 
 const Home = () => {
   const [columns, setColumns] = useState<Columns>(Board);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState("");
   const [taskToEdit, setTaskToEdit] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const openModal = (columnId: any, taskToEdit: any = null) => {
     setSelectedColumn(columnId);
-    setTaskToEdit(taskToEdit); // Set task for editing
+    setTaskToEdit(taskToEdit);
     setModalOpen(true);
   };
 
@@ -35,7 +36,7 @@ const Home = () => {
     const column = newBoard[selectedColumn];
     const taskIndex = column.items.findIndex((task: any) => task.id === taskData.id);
     if (taskIndex !== -1) {
-      column.items[taskIndex] = taskData; // Update task data
+      column.items[taskIndex] = taskData;
       setColumns(newBoard);
     }
   };
@@ -45,14 +46,22 @@ const Home = () => {
     Object.entries(newBoard).forEach(([columnId, column]: any) => {
       const taskIndex = column.items.findIndex((task: any) => task.id === taskId);
       if (taskIndex !== -1) {
-        column.items.splice(taskIndex, 1); // Delete task
+        column.items.splice(taskIndex, 1);
         setColumns(newBoard);
       }
     });
   };
 
+  const filterTasks = (tasks: any[]) => {
+    return tasks.filter((task) =>
+      task.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
   return (
     <>
+      <Navbar onSearch={setSearchQuery} />
+
       <DragDropContext onDragEnd={(result: any) => onDragEnd(result, columns, setColumns)}>
         <div className="w-full flex items-start justify-between px-5 pb-8 md:gap-0 gap-10">
           {Object.entries(columns).map(([columnId, column]: any) => (
@@ -67,17 +76,15 @@ const Home = () => {
                     <div className="flex items-center justify-center py-[10px] w-full bg-white rounded-lg shadow-sm text-[#555] font-medium text-[15px]">
                       {column.name}
                     </div>
-                    {column.items.map((task: any, index: any) => (
+                    {filterTasks(column.items).map((task: any, index: any) => (
                       <Draggable key={task.id.toString()} draggableId={task.id.toString()} index={index}>
                         {(provided: any) => (
-                          <>
-                            <Task
-                              provided={provided}
-                              task={task}
-                              onEdit={() => openModal(columnId, task)} // Open modal to edit task
-                              onDelete={() => handleDeleteTask(task.id)} // Delete task
-                            />
-                          </>
+                          <Task
+                            provided={provided}
+                            task={task}
+                            onEdit={() => openModal(columnId, task)}
+                            onDelete={() => handleDeleteTask(task.id)}
+                          />
                         )}
                       </Draggable>
                     ))}
@@ -105,7 +112,7 @@ const Home = () => {
         setOpen={setModalOpen}
         handleAddTask={handleAddTask}
         handleUpdateTask={handleUpdateTask}
-        taskToEdit={taskToEdit} // Pass the task to edit to the modal
+        taskToEdit={taskToEdit}
       />
     </>
   );
